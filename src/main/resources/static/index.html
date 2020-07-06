@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betting app</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+</head>
+<body>
+    <div id="app">
+        <div id="account" class="text-center">
+            <h3>Odabir igrača</h3>
+            <select v-model="selected_account">
+                <option disabled value="">Odaberi igrača</option>
+                <option v-for="account in account_list">{{account.username}}</option>
+            </select>
+            <span>Igrač: {{ selected_account }}</span>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <h3>Ponuda</h3>
+                    <table>
+                        <tr>
+                            <td><h4>Nogomet</h4></td>
+                            <td style="text-align:center"><h4>1</h4></td>
+                            <td style="text-align:center"><h4>X</h4></td>
+                            <td style="text-align:center"><h4>2</h4></td>
+                        </tr>
+                        <tr v-for="pair in odds_list_soccer">
+                            <td>{{pair.text}}</td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, '1', pair.quota1)" :key="pair.id">{{pair.quota1}}</button></td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, 'X', pair.quotaX)" :key="pair.id">{{pair.quotaX}}</button></td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, '2', pair.quota2)" :key="pair.id">{{pair.quota2}}</button></td>
+                        </tr>
+                    </table>
+                    <br>
+                    <table>
+                        <tr>
+                            <td><h4>Košarka</h4></td>
+                            <td style="text-align:center"><h4>1</h4></td>
+                            <td style="text-align:center"><h4>X</h4></td>
+                            <td style="text-align:center"><h4>2</h4></td>
+                        </tr>
+                        <tr v-for="pair in odds_list_basket">
+                            <td>{{pair.text}}</td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, '1', pair.quota1)" :key="pair.id">{{pair.quota1}}</button></td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, 'X', pair.quotaX)" :key="pair.id">{{pair.quotaX}}</button></td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, '2', pair.quota2)" :key="pair.id">{{pair.quota2}}</button></td>
+                        </tr>
+                    </table>
+                    <br>
+                    <table>
+                        <tr>
+                            <td><h4>Tenis</h4></td>
+                            <td style="text-align:center"><h4>1</h4></td>
+                            <td style="text-align:center"><h4>2</h4></td>
+                        </tr>
+                        <tr v-for="pair in odds_list_tennis">
+                            <td>{{pair.text}}</td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, '1', pair.quota1)" :key="pair.id">{{pair.quota1}}</button></td>
+                            <td><button style="width:100%" type="button" class="btn btn-default btn-xs" @click="addPairToTicket(pair, '2', pair.quota2)" :key="pair.id">{{pair.quota2}}</button></td>
+                        </tr>
+                    </table>
+                </div>
+
+
+                <div class="col-lg-4">
+                    <h3>Listić</h3>
+                    <div class="list-group">
+                        <div class="row align-items-center list-group-item" style="padding:0px;border-radius:0px" v-for="selected in selected_pairs">
+                            <div class="col-lg-8" style="white-space: nowrap">{{selected.pair.text}}</div>
+                            <div class="col-lg-1">{{selected.odd}}</div>
+                            <div class="col-lg-2">{{selected.quota}}</div>
+                            <button class="col-lg-1 btn btn-secondary btn-sm" style="border-radius:0" type="button" @click="removePairFromTicket(selected)">X</button>
+                        </div>
+                    </div>
+                    <div style="overflow: hidden;">
+                        <p style="float:left">Koeficijent</p>
+                        <p style="float:right">{{current_quota}}</p>
+                    </div>
+                    <div>
+                        <form @submit.prevent="submitTicket">
+                            <label for="bet">Uplata</label>
+                            <input style="text-align:right;float:right" type="number" id="bet" name="bet" v-model="bet"><br>
+                            <input :disabled="submitDisabled" style="margin-top:10px" type="submit" value="Uplati" class="btn btn-success btn-block">
+                        </form>
+
+                        <div style="overflow: hidden;">
+                            <p style="float:left">Dobitak</p>
+                            <p style="float:right">{{current_winning}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <h3>Uplaćeni listići</h3>
+                    <button class="btn btn-info btn-block" @click="fetchTickets()">Dohvati</button>
+                    <div class="list-group">
+                        <div class="list-group-item" v-for="(ticket,index) in played_tickets" @click="fetchPairsFromTickets(ticket.id, index)">
+                            <div class="list-group" v-show="itemToShow == index">
+                                <p>Odigrani parovi</p>
+                                <div class="list-group-item d-flex justify-content-between align-items-center" style="overflow:auto" v-for="pair in ticket_pairs">
+                                    <span style="float:left">{{pair.text}}</span>
+                                    <span style="float:right">{{pair.quota}}</span>
+                                    <span style="float:right;margin-right:20px">{{pair.type}}</span>
+                                </div>
+                            </div>
+                            <div style="overflow:hidden;">
+                                <p style="float:left">Uplata</p>
+                                <p style="float:right">{{ticket.bet}}</p>
+                            </div>
+                            <div style="overflow:hidden;">
+                                <p style="float:left">Koeficijent</p>
+                                <p style="float:right">{{ticket.quota}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var oddsList = new Vue({
+            el:'#app',
+            data: {
+                odds_list_soccer: [],
+                odds_list_basket: [],
+                odds_list_tennis: [],
+                account_list: [],
+                selected_pairs: [],
+                played_tickets: [],
+                ticket_pairs: [],
+                total_quota: 0,
+                selected_account: null,
+                bet: 0,
+                itemToShow: -1
+            },
+            mounted(){
+                this.fetchPairsSoccer();
+                this.fetchPairsBasket();
+                this.fetchPairsTennis();
+                this.fetchAccounts();
+            },
+            methods: {
+                fetchPairsSoccer(){
+                    axios.get('/events/sport',{
+                        params: {
+                            name: 'nogomet'
+                        }
+                    }).then(function(response){
+                        this.odds_list_soccer = response.data;
+                    }.bind(this));
+                },
+                fetchPairsBasket(){
+                    axios.get('/events/sport',{
+                        params: {
+                            name: 'kosarka'
+                        }
+                    }).then(function(response){
+                        this.odds_list_basket = response.data;
+                    }.bind(this));
+                },
+                fetchPairsTennis(){
+                    axios.get('/events/sport',{
+                        params: {
+                            name: 'tenis'
+                        }
+                    }).then(function(response){
+                        this.odds_list_tennis = response.data;
+                    }.bind(this));
+                },
+                fetchAccounts(){
+                    axios.get("/account/all").then(function(response){
+                        this.account_list = response.data;
+                    }.bind(this));
+                },
+                fetchTickets(){
+                    if (this.selected_account != null) {
+                        axios.get('/ticket/player', {
+                            params: {
+                                username: this.selected_account
+                            }
+                            }).then(function (response) {
+                                this.played_tickets = response.data;
+                        }.bind(this));
+                    } else {
+                        window.alert("Korisničko ime mora biti odabrano!");
+                    }
+                },
+                fetchPairsFromTickets(id, index){
+                    axios.get('/ticket/pairs', {
+                        params: {
+                            ticketId: id
+                        }
+                        }).then(function (response) {
+                            this.ticket_pairs = response.data;
+                    }.bind(this));
+                    this.itemToShow = index;
+                },
+                addPairToTicket(pair, odd, quota){
+                    for (var i=0; i < this.selected_pairs.length; i++) {
+                        if (this.selected_pairs[i].pair == pair){
+                            window.alert("Par je već dodan na listić");
+                            return;
+                        }
+                    }
+                    this.selected_pairs.push({
+                        pair: pair,
+                        odd: odd,
+                        quota: quota
+                    });
+                    this.sendPair(pair.id, odd);
+                },
+                removePairFromTicket(selected){
+                    this.selected_pairs.splice(this.selected_pairs.indexOf(selected),1);
+                    this.removePair(selected.pair.id, selected.odd);
+                },
+                sendPair(pairId, odd){
+                    axios.post('/ticket/add', {
+                        id: pairId,
+                        type: odd
+                    }).then((response) => {
+                        this.total_quota = response.data;
+                        console.log(this.total_quota);
+                    }).catch(function(error){
+                        console.log(error);
+                    });
+                },
+                removePair(pairId, odd){
+                    axios.post('/ticket/remove', {
+                        id: pairId,
+                        type: odd
+                    }).then((response) => {
+                        this.total_quota = response.data;
+                        console.log(this.total_quota);
+                    }).catch(function(error){
+                        console.log(error);
+                    });
+                },
+                submitTicket(){
+                    console.log(this.selected_account);
+                    console.log(this.bet);
+                    if (!isNaN(this.bet) && this.selected_account != null){
+                        if (this.bet >= 5.00){
+                            axios.post('/ticket/submit', {
+                                bet: this.bet,
+                                username: this.selected_account
+                            }).then((response) => {
+                                if (response.status == 200){
+                                    this.selected_pairs = [];
+                                    this.total_quota = null;
+                                    this.bet = 0;
+                                    window.alert("Listić uplaćen");
+                                }
+                            }).catch(function(error){
+                                if (error.response.status == 403){
+                                    window.alert("Nema dovoljno sredstava na računu za uplatu!");
+                                } else {
+                                    console.log("Unexpected error response");
+                                }
+                            });
+                        } else {
+                            window.alert("Ulog mora biti veći od 5kn!");
+                        }
+                    } else {
+                        window.alert("Korisničko ime mora biti odabrano i ulog broj!");
+                    }
+                }
+            },
+            computed: {
+                current_quota: function() {
+                    console.log("Called computed...");
+                    return this.total_quota;
+                },
+                current_winning: function() {
+                    if (this.total_quota > 0 && this.bet > 0){
+                        return this.total_quota*this.bet;
+                    } else {
+                        return 0;
+                    }
+                },
+                submitDisabled: function() {
+                    return !this.selected_pairs.length;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
