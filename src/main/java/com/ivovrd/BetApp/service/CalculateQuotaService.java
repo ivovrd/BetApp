@@ -1,6 +1,7 @@
 package com.ivovrd.BetApp.service;
 
 import com.ivovrd.BetApp.model.BetEvent;
+import com.ivovrd.BetApp.model.PlayedEvent;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,11 +9,12 @@ import java.util.Set;
 
 @Service
 public class CalculateQuotaService {
-    private final HashMap<String, Integer> sportsMap = new HashMap<>();
     private Double quotaSum = 1.0;
     public static Double BONUS5 = 5.0;
     public static Double BONUS10 = 10.0;
     private Set<String> allSports = new HashSet<>();
+    private final HashMap<String, Integer> sportsMap = new HashMap<>();
+    private final Set<PlayedEvent> playedEvents = new HashSet<>();
 
     public Set<String> getAllSports() {
         return allSports;
@@ -37,11 +39,13 @@ public class CalculateQuotaService {
 
     public Double increaseSumQuota(Character type, BetEvent betEvent) {
         addSportsMap(betEvent.getSport());
+        addPlayedEvent(new PlayedEvent(betEvent, type));
         return this.quotaSum *= getQuota(type, betEvent);
     }
 
     public Double decreaseSumQuota(Character type, BetEvent betEvent) {
         removeSportsMap(betEvent.getSport());
+        removePlayedEvent(betEvent);
         return this.quotaSum /= getQuota(type, betEvent);
     }
 
@@ -61,6 +65,18 @@ public class CalculateQuotaService {
                 this.sportsMap.remove(sport);
             }
         }
+    }
+
+    public void addPlayedEvent(PlayedEvent playedEvent){
+        this.playedEvents.add(playedEvent);
+    }
+
+    public void removePlayedEvent(BetEvent betEvent) {
+        this.playedEvents.removeIf((PlayedEvent event) -> event.getEvent().equals(betEvent));
+    }
+
+    public Set<PlayedEvent> getPlayedEvents (){
+        return this.playedEvents;
     }
 
     public void checkThreeFromSameSportBonus(){
@@ -88,5 +104,6 @@ public class CalculateQuotaService {
     public void resetCacheOnSubmit(){
         this.quotaSum = 1.0;
         this.sportsMap.clear();
+        this.playedEvents.clear();
     }
 }

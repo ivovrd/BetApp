@@ -26,15 +26,12 @@ public class TicketController {
     private CalculateQuotaService calculateQuotaService;
     @Autowired
     private TransactionService transactionService;
-    private final Set<PlayedEvent> playedEvents = new HashSet<>();
 
     @PostMapping(path = "/add", consumes = "application/json", produces = "application/json")
     public @ResponseBody Double addBetEventOnTicket(@RequestBody String json) {
         Long id = Long.parseLong(JSON.parseObject(json).get("id").toString());
         Character type = JSON.parseObject(json).get("type").toString().charAt(0);
         BetEvent betEvent = betEventService.getBetEventById(id);
-        PlayedEvent playedEvent = new PlayedEvent(betEvent, type);
-        playedEvents.add(playedEvent);
         return calculateQuotaService.increaseSumQuota(type, betEvent);
     }
 
@@ -43,7 +40,6 @@ public class TicketController {
         Long id = Long.parseLong(JSON.parseObject(json).get("id").toString());
         Character type = JSON.parseObject(json).get("type").toString().charAt(0);
         BetEvent betEvent = betEventService.getBetEventById(id);
-        playedEvents.removeIf((PlayedEvent event) -> event.getEvent().equals(betEvent));
         return calculateQuotaService.decreaseSumQuota(type, betEvent);
     }
 
@@ -62,10 +58,11 @@ public class TicketController {
         calculateQuotaService.checkAndAddBonuses();
         Ticket ticket = new Ticket(transaction, bet, calculateQuotaService.getQuotaSum());
         ticketService.persistTicketToDb(ticket);
-        playedEvents.forEach((PlayedEvent event) -> {
+        calculateQuotaService.getPlayedEvents().forEach((PlayedEvent event) -> {
             event.setTicket(ticket);
         });
-        playedEventService.persistPlayedEventsToDb(playedEvents);
+        //playedEventService.persistPlayedEventsToDb(playedEvents);
+        playedEventService.persistPlayedEventsToDb(calculateQuotaService.getPlayedEvents());
         calculateQuotaService.resetCacheOnSubmit();
     }
 

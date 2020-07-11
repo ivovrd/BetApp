@@ -1,5 +1,6 @@
 package com.ivovrd.BetApp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne(cascade = CascadeType.PERSIST)
+    @JsonBackReference(value="ticket")
     @JoinColumn(name = "transaction_id", referencedColumnName = "id")
     private Transaction transaction;
     private Double bet;

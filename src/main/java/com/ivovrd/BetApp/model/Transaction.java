@@ -1,5 +1,7 @@
 package com.ivovrd.BetApp.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 
 @Entity
@@ -14,6 +16,7 @@ public class Transaction {
     @Column(name = "trans_type")
     private String transactionType;
     @OneToOne(mappedBy = "transaction", targetEntity = Ticket.class)
+    @JsonManagedReference(value="transaction")
     Ticket ticket;
 
     public Transaction() {
@@ -48,9 +51,9 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    //public Ticket getTicket() {
-    //    return ticket;
-    //}
+    public Ticket getTicket() {
+        return ticket;
+    }
 
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;

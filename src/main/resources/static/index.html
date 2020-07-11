@@ -17,7 +17,7 @@
                 <option disabled value="">Odaberi igrača</option>
                 <option v-for="account in account_list">{{account.username}}</option>
             </select>
-            <span>Igrač: {{ selected_account }}</span>
+            <span>Trenutni igrač: {{ selected_account }}</span>
         </div>
         <div class="container">
             <div class="row">
@@ -188,8 +188,9 @@
                             }).then(function (response) {
                                 this.played_tickets = response.data;
                         }.bind(this));
+                        this.itemToShow = -1;
                     } else {
-                        window.alert("Korisničko ime mora biti odabrano!");
+                        window.alert("Korisničko ime nije odabrano!");
                     }
                 },
                 fetchPairsFromTickets(id, index){
@@ -245,7 +246,7 @@
                 submitTicket(){
                     console.log(this.selected_account);
                     console.log(this.bet);
-                    if (!isNaN(this.bet) && this.selected_account != null){
+                    if (this.selected_account != null){
                         if (this.bet >= 5.00){
                             axios.post('/ticket/submit', {
                                 bet: this.bet,
@@ -253,7 +254,7 @@
                             }).then((response) => {
                                 if (response.status == 200){
                                     this.selected_pairs = [];
-                                    this.total_quota = null;
+                                    this.total_quota = 0;
                                     this.bet = 0;
                                     window.alert("Listić uplaćen");
                                 }
@@ -268,13 +269,12 @@
                             window.alert("Ulog mora biti veći od 5kn!");
                         }
                     } else {
-                        window.alert("Korisničko ime mora biti odabrano i ulog broj!");
+                        window.alert("Korisničko ime nije odabrano!");
                     }
                 }
             },
             computed: {
                 current_quota: function() {
-                    console.log("Called computed...");
                     return this.total_quota;
                 },
                 current_winning: function() {

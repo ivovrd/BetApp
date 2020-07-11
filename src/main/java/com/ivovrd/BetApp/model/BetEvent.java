@@ -2,6 +2,7 @@ package com.ivovrd.BetApp.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -76,14 +77,19 @@ public class BetEvent {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this){
+    public boolean equals(Object object) {
+        if (object == this){
             return true;
         }
-        if (!(o instanceof BetEvent)){
+        if (!(object instanceof BetEvent)){
             return false;
         }
-        BetEvent betEvent = (BetEvent) o;
+        BetEvent betEvent = (BetEvent) object;
         return id.equals(betEvent.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, text, sport);
     }
 }

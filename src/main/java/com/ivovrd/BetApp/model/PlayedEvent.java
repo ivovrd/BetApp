@@ -3,7 +3,6 @@ package com.ivovrd.BetApp.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Table(name = "played_events")
