@@ -4,8 +4,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
+/**
+ * This class represents bet ticket entity
+ */
 @Entity
 @Table(name = "ticket")
 public class Ticket {
@@ -22,7 +26,8 @@ public class Ticket {
     @JsonManagedReference(value="ticket")
     Set<PlayedEvent> playedEvents = new HashSet<>();
 
-    public Ticket(){}
+    // default constructor to prevent Jackson JsonMappingException
+    public Ticket(){ }
 
     public Ticket(Transaction transaction, Double bet, Double quota) {
         this.transaction = transaction;
@@ -72,5 +77,29 @@ public class Ticket {
 
     public void setQuota(Double quota) {
         this.quota = quota;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ticket ticket = (Ticket) o;
+        return id.equals(ticket.id) &&
+                Objects.equals(bet, ticket.bet) &&
+                Objects.equals(quota, ticket.quota);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, bet, quota);
+    }
+
+    @Override
+    public String toString() {
+        return "Ticket{" +
+                "id=" + id +
+                ", bet=" + bet +
+                ", quota=" + quota +
+                '}';
     }
 }

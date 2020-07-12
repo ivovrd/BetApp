@@ -26,6 +26,7 @@ public class TicketController {
     private CalculateQuotaService calculateQuotaService;
     @Autowired
     private TransactionService transactionService;
+    private static final String transactionType = "OUT";
 
     @PostMapping(path = "/add", consumes = "application/json", produces = "application/json")
     public @ResponseBody Double addBetEventOnTicket(@RequestBody String json) {
@@ -53,15 +54,12 @@ public class TicketController {
             throw new MissingFundsException();
         }
         accountService.persistAccountToDb(account);
-        Transaction transaction = new Transaction(account, "OUT");
+        Transaction transaction = new Transaction(account, transactionType);
         calculateQuotaService.setAllSports(betEventService.getAvailableSports());
         calculateQuotaService.checkAndAddBonuses();
         Ticket ticket = new Ticket(transaction, bet, calculateQuotaService.getQuotaSum());
         ticketService.persistTicketToDb(ticket);
-        calculateQuotaService.getPlayedEvents().forEach((PlayedEvent event) -> {
-            event.setTicket(ticket);
-        });
-        //playedEventService.persistPlayedEventsToDb(playedEvents);
+        calculateQuotaService.getPlayedEvents().forEach((PlayedEvent event) -> event.setTicket(ticket));
         playedEventService.persistPlayedEventsToDb(calculateQuotaService.getPlayedEvents());
         calculateQuotaService.resetCacheOnSubmit();
     }

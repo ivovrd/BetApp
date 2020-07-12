@@ -5,6 +5,9 @@ import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * This class represents betting event entity
+ */
 @Entity
 @Table(name = "sporting_event")
 public class BetEvent {
@@ -77,19 +80,29 @@ public class BetEvent {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (object == this){
-            return true;
-        }
-        if (!(object instanceof BetEvent)){
-            return false;
-        }
-        BetEvent betEvent = (BetEvent) object;
-        return id.equals(betEvent.id);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BetEvent betEvent = (BetEvent) o;
+        return id.equals(betEvent.id) &&
+                text.equals(betEvent.text) &&
+                sport.equals(betEvent.sport);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, text, sport);
+    }
+
+    @Override
+    public String toString() {
+        return "BetEvent{" +
+                "id=" + id +
+                ", text='" + text + '\'' +
+                ", quota1=" + quota1 +
+                ", quotaX=" + quotaX +
+                ", quota2=" + quota2 +
+                ", sport='" + sport + '\'' +
+                '}';
     }
 }

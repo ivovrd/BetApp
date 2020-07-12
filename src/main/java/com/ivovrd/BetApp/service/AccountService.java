@@ -13,9 +13,11 @@ public class AccountService {
     public Account getAccount(String username){
         return accountRepository.findAccountByUsername(username);
     }
+
     public void persistAccountToDb (Account account) {
         accountRepository.save(account);
     }
+
     public Iterable<Account> getAllAccounts(){
         return accountRepository.findAll();
     }

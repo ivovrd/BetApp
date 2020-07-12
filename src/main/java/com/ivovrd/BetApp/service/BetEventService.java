@@ -4,7 +4,6 @@ import com.ivovrd.BetApp.model.BetEvent;
 import com.ivovrd.BetApp.repository.BetEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Set;
 
 @Service
@@ -24,5 +23,7 @@ public class BetEventService {
         return betEventRepository.findEventById(id);
     }
 
-    public Set<String> getAvailableSports() { return betEventRepository.findAllAvailableSports(); }
+    public Set<String> getAvailableSports() {
+        return betEventRepository.findAllAvailableSports();
+    }
 }

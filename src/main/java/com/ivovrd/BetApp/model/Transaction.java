@@ -1,9 +1,12 @@
 package com.ivovrd.BetApp.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
+import java.util.Objects;
 
+/**
+ * The class to note transaction each time a ticket is submitted
+ */
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -19,8 +22,8 @@ public class Transaction {
     @JsonManagedReference(value="transaction")
     Ticket ticket;
 
-    public Transaction() {
-    }
+    // default constructor to prevent Jackson JsonMappingException
+    public Transaction() { }
 
     public Transaction(Account account, String transactionType) {
         this.account = account;
@@ -51,11 +54,22 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public Ticket getTicket() {
-        return ticket;
-    }
+    public Ticket getTicket() { return ticket; }
 
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
