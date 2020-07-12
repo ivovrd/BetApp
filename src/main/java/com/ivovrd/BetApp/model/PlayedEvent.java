@@ -2,6 +2,7 @@ package com.ivovrd.BetApp.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -9,15 +10,16 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "played_events")
-public class PlayedEvent {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class PlayedEvent implements Serializable {
+    @EmbeddedId
+    private final PlayedEventId id = new PlayedEventId();
     @ManyToOne
+    @MapsId("ticketId")
     @JoinColumn(name = "ticket_id")
     @JsonBackReference(value="ticket")
     Ticket ticket;
     @ManyToOne
+    @MapsId("eventId")
     @JoinColumn(name = "event_id")
     @JsonBackReference(value="event")
     BetEvent event;
@@ -30,14 +32,6 @@ public class PlayedEvent {
     public PlayedEvent(BetEvent event, Character typePlayed) {
         this.event = event;
         this.typePlayed = typePlayed;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Ticket getTicket() {

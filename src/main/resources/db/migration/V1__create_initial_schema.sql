@@ -35,11 +35,12 @@ CREATE TABLE sporting_event (
 );
 
 CREATE TABLE played_events (
-    id bigint(20) NOT NULL AUTO_INCREMENT,
+    --id bigint(20) NOT NULL AUTO_INCREMENT,
     ticket_id bigint(20),
     event_id bigint(20),
     type_played char(1),
     CONSTRAINT chk_type CHECK (type_played IN ('1', 'X', '2')),
     FOREIGN KEY (ticket_id) REFERENCES ticket(id),
-    FOREIGN KEY (event_id) REFERENCES sporting_event(id)
+    FOREIGN KEY (event_id) REFERENCES sporting_event(id),
+    PRIMARY KEY (ticket_id, event_id)
 );
