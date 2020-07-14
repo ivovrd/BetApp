@@ -35,7 +35,6 @@ CREATE TABLE sporting_event (
 );
 
 CREATE TABLE played_events (
-    --id bigint(20) NOT NULL AUTO_INCREMENT,
     ticket_id bigint(20),
     event_id bigint(20),
     type_played char(1),

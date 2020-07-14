@@ -1,6 +1,7 @@
 package com.ivovrd.BetApp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.ivovrd.BetApp.exceptions.InvalidParameterException;
 import com.ivovrd.BetApp.exceptions.MissingFundsException;
 import com.ivovrd.BetApp.model.*;
 import com.ivovrd.BetApp.service.*;
@@ -30,16 +31,28 @@ public class TicketController {
 
     @PostMapping(path = "/add", consumes = "application/json", produces = "application/json")
     public @ResponseBody Double addBetEventOnTicket(@RequestBody String json) {
-        Long id = Long.parseLong(JSON.parseObject(json).get("id").toString());
-        Character type = JSON.parseObject(json).get("type").toString().charAt(0);
+        long id;
+        char type;
+        try {
+            id = Long.parseLong(JSON.parseObject(json).get("id").toString());
+            type = JSON.parseObject(json).get("type").toString().charAt(0);
+        } catch (Exception exception) {
+            throw new InvalidParameterException();
+        }
         BetEvent betEvent = betEventService.getBetEventById(id);
         return calculateQuotaService.increaseSumQuota(type, betEvent);
     }
 
     @PostMapping(path = "/remove", consumes = "application/json", produces = "application/json")
     public @ResponseBody Double removeBetEventOnTicket(@RequestBody String json) {
-        Long id = Long.parseLong(JSON.parseObject(json).get("id").toString());
-        Character type = JSON.parseObject(json).get("type").toString().charAt(0);
+        long id;
+        char type;
+        try {
+            id = Long.parseLong(JSON.parseObject(json).get("id").toString());
+            type = JSON.parseObject(json).get("type").toString().charAt(0);
+        } catch (Exception exception) {
+            throw new InvalidParameterException();
+        }
         BetEvent betEvent = betEventService.getBetEventById(id);
         return calculateQuotaService.decreaseSumQuota(type, betEvent);
     }
@@ -47,8 +60,14 @@ public class TicketController {
     @PostMapping(path = "/submit", consumes = "application/json", produces = "application/json")
     @ResponseStatus(value = HttpStatus.OK)
     public void submitTicket(@RequestBody String json){
-        Double bet = Double.parseDouble(JSON.parseObject(json).get("bet").toString());
-        String username = JSON.parseObject(json).get("username").toString();
+        Double bet;
+        String username;
+        try {
+            bet = Double.parseDouble(JSON.parseObject(json).get("bet").toString());
+            username = JSON.parseObject(json).get("username").toString();
+        } catch (Exception exception) {
+            throw new InvalidParameterException();
+        }
         Account account = accountService.getAccount(username);
         if (!account.decreaseBalance(bet)){
             throw new MissingFundsException();

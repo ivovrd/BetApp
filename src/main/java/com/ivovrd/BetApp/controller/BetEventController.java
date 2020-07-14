@@ -11,10 +11,6 @@ import org.springframework.web.bind.annotation.*;
 public class BetEventController {
     @Autowired
     private BetEventService betEventService;
-    @GetMapping(path = "/all")
-    public @ResponseBody Iterable<BetEvent> getAllEvents() {
-        return betEventService.getAllBetEvents();
-    }
     @GetMapping(path = "/sport")
     public @ResponseBody Iterable<BetEvent> getEventsBySport(@RequestParam(value = "name")String sport) {
         return betEventService.getBetEventsBySport(sport);

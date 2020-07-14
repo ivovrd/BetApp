@@ -229,7 +229,11 @@
                         this.total_quota = response.data;
                         console.log(this.total_quota);
                     }).catch(function(error){
-                        console.log(error);
+                        if (error.response.status == 400) {
+                            console.log(error.response.data);
+                        } else {
+                            console.log("Unexpected error response");
+                        }
                     });
                 },
                 removePair(pairId, odd){
@@ -240,7 +244,11 @@
                         this.total_quota = response.data;
                         console.log(this.total_quota);
                     }).catch(function(error){
-                        console.log(error);
+                        if (error.response.status == 400) {
+                            console.log(error.response.data);
+                        } else {
+                            console.log("Unexpected error response");
+                        }
                     });
                 },
                 submitTicket(){
@@ -261,6 +269,8 @@
                             }).catch(function(error){
                                 if (error.response.status == 403){
                                     window.alert("Nema dovoljno sredstava na računu za uplatu!");
+                                } else if (error.response.status == 400) {
+                                    console.log(error.response.data);
                                 } else {
                                     console.log("Unexpected error response");
                                 }
