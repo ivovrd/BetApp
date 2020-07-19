@@ -11,10 +11,6 @@ public class BetEventService {
     @Autowired
     private BetEventRepository betEventRepository;
 
-    public Iterable<BetEvent> getAllBetEvents(){
-        return betEventRepository.findAll();
-    }
-
     public Iterable<BetEvent> getBetEventsBySport(String sport){
         return betEventRepository.findEventsBySport(sport);
     }

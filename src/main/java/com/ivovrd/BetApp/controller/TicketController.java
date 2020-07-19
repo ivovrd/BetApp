@@ -29,6 +29,11 @@ public class TicketController {
     private TransactionService transactionService;
     private static final String transactionType = "OUT";
 
+    /**
+     * Adds selected BetEvent to current bet ticket and returns updated value of total quota
+     * @param json Json file containing BetEvent id and selected type
+     * @return Updated value of current quota
+     */
     @PostMapping(path = "/add", consumes = "application/json", produces = "application/json")
     public @ResponseBody Double addBetEventOnTicket(@RequestBody String json) {
         long id;
@@ -43,6 +48,11 @@ public class TicketController {
         return calculateQuotaService.increaseSumQuota(type, betEvent);
     }
 
+    /**
+     * Removes selected BetEvent from current bet ticket and returns updated value of total quota
+     * @param json Json file containing BetEvent id and selected type
+     * @return Updated value of current quota
+     */
     @PostMapping(path = "/remove", consumes = "application/json", produces = "application/json")
     public @ResponseBody Double removeBetEventOnTicket(@RequestBody String json) {
         long id;
@@ -57,6 +67,10 @@ public class TicketController {
         return calculateQuotaService.decreaseSumQuota(type, betEvent);
     }
 
+    /**
+     * Saves bet ticket to database, creates new transaction and updates account information accordingly
+     * @param json Json file containing stake and username of the player
+     */
     @PostMapping(path = "/submit", consumes = "application/json", produces = "application/json")
     @ResponseStatus(value = HttpStatus.OK)
     public void submitTicket(@RequestBody String json){
@@ -83,6 +97,11 @@ public class TicketController {
         calculateQuotaService.resetCacheOnSubmit();
     }
 
+    /**
+     * Gets all tickets of specified player
+     * @param username A string containing username of the player
+     * @return All tickets of the player
+     */
     @GetMapping(path = "/player")
     public @ResponseBody Iterable<Ticket> getTicketsForPlayer(@RequestParam(value = "username")String username) {
         Account account = accountService.getAccount(username);
@@ -94,6 +113,11 @@ public class TicketController {
         return tickets;
     }
 
+    /**
+     * Gets all the pairs played in the bet ticket
+     * @param id A Long containing ticket id
+     * @return All the bet events played in the ticket
+     */
     @GetMapping(path = "/pairs")
     public @ResponseBody Iterable<TicketPlayedEvents> getPairsOfTicket(@RequestParam(value = "ticketId") Long id){
         Ticket ticket = ticketService.getTicketById(id);

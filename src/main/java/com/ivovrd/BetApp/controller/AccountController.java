@@ -14,8 +14,12 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
+    /**
+     * Gets accounts of all available players
+     * @return All accounts from database
+     */
     @GetMapping(path = "/all")
-    public @ResponseBody Iterable<Account> getAllEvents() {
+    public @ResponseBody Iterable<Account> getAccounts() {
         return accountService.getAllAccounts();
     }
 }
